@@ -1,3 +1,4 @@
+
 # Snapnest
 
 A clean coral/white social-media inspired photo sharing platform
@@ -25,3 +26,6 @@ Open http://localhost:8001
 
 ## Deploy (Render / Railway)
 Set env vars: `SECRET_KEY`, `DATABASE_URL`, `DEBUG=False`, `ALLOWED_HOSTS`
+
+# album
+45fdaec2affa29fe955ea953e5ca6458a9372b48
