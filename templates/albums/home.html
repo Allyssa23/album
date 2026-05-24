@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}SnapNest — Explore{% endblock %}
+{% block content %}
+
+{% if not search_query and not request.user.is_authenticated %}
+<div style="text-align:center;padding:4rem 2rem 2.5rem;background:linear-gradient(135deg,#fff5f5,#fff0f7);border-radius:var(--radius-lg);margin-bottom:2rem;">
+  <div style="font-size:3.5rem;margin-bottom:1rem;">📸</div>
+  <h1 style="font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:0.75rem;">
+    Your photos,<br><span style="color:var(--accent);">beautifully nested.</span>
+  </h1>
+  <p style="color:var(--text-muted);max-width:420px;margin:0 auto 2rem;line-height:1.6;">
+    Organize, share, and discover photo albums in a clean, modern space.
+  </p>
+  <div class="flex gap-2 items-center" style="justify-content:center;">
+    <a href="{% url 'accounts:register' %}" class="btn btn-primary">Get Started Free 🚀</a>
+    <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Sign In</a>
+  </div>
+</div>
+{% endif %}
+
+<div class="page-header">
+  <div>
+    <h2 class="page-title">
+      {% if search_query %}Results for "{{ search_query }}"
+      {% elif request.user.is_authenticated %}Your Feed
+      {% else %}Explore Albums{% endif %}
+    </h2>
+    <p class="page-subtitle">{{ page_obj.paginator.count }} album{{ page_obj.paginator.count|pluralize }}</p>
+  </div>
+  {% if request.user.is_authenticated %}
+    <a href="{% url 'albums:album-create' %}" class="btn btn-primary">+ New Album</a>
+  {% endif %}
+</div>
+
+{% if albums %}
+  <div class="album-grid">
+    {% for album in albums %}
+    <a href="{% url 'albums:album-detail' album.pk %}" class="album-card">
+      {% if album.cover %}
+        <img class="album-cover" src="{{ album.cover.url }}" alt="{{ album.title }}" loading="lazy">
+      {% else %}
+        <div class="album-cover-placeholder">🖼️</div>
+      {% endif %}
+      <div class="album-info">
+        <div class="album-title">{{ album.title }}</div>
+        <div class="album-meta">
+          <span>{{ album.photo_count }} photo{{ album.photo_count|pluralize }}</span>
+          <span class="badge {% if album.visibility == 'public' %}badge-green{% else %}badge-gray{% endif %}">
+            {% if album.visibility == 'public' %}Public{% else %}Private{% endif %}
+          </span>
+          {% if album.owner == request.user %}<span class="badge badge-coral">Mine</span>{% endif %}
+        </div>
+        <div class="album-meta mt-1">by {{ album.owner.username }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <div class="flex gap-1 items-center" style="justify-content:center;margin-top:2rem;">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-ghost btn-sm">← Prev</a>
+    {% endif %}
+    <span class="text-muted" style="font-size:0.85rem;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-ghost btn-sm">Next →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+{% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">🪺</div>
+    <h3>{% if search_query %}No results found{% else %}No albums yet{% endif %}</h3>
+    <p class="mt-1">{% if search_query %}Try different keywords.{% elif request.user.is_authenticated %}Create your first album!{% else %}Sign up to get started.{% endif %}</p>
+    {% if request.user.is_authenticated and not search_query %}
+      <a href="{% url 'albums:album-create' %}" class="btn btn-primary mt-3">Create Album</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}
